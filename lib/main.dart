@@ -87,11 +87,7 @@ class Spiders extends State<SpiderScreen> {
             top: _yPosition,
             child: GestureDetector(
               onTap: _onObjectTappedScare,
-              child: Container(
-                width: 50,
-                height: 50,
-                color: Colors.red, // The moving object (a red square)
-              ),
+              child: Image.asset("assets/spider.gif", width: 200,height: 200,),
             ),
           ),
         ],
