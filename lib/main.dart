@@ -26,8 +26,10 @@ class SpiderScreen extends StatefulWidget {
 }
 
 class Spiders extends State<SpiderScreen> {
-  double _xPosition = 50;
-  double _yPosition = 100;
+  //winning spider
+  double _winningSpiderX = 100;
+  double _winningSpiderY = 150;
+
   final int objectCount = 5; //Number of spiders
   List<Offset> _positions = [];
   final Random _random = Random();
@@ -36,16 +38,26 @@ class Spiders extends State<SpiderScreen> {
   
   void initState() {
     super.initState();
+     _positions = List.generate(
+      objectCount,
+      (_) => Offset(
+        _random.nextDouble() * 300, // Initial random x position
+        _random.nextDouble() * 500, // Initial random y position
+      ),
+    );
     // Start moving the object randomly every second
-    Timer.periodic(const Duration(seconds: 1 ), (Timer timer) {
+    Timer.periodic( Duration(seconds: 1 ), (Timer timer) {
       setState(() { 
         _positions = List.generate(
           objectCount,
           (_) => Offset(
-            _random.nextDouble() * MediaQuery.of(context).size.width - 50,
-            _random.nextDouble() * MediaQuery.of(context).size.height - 50,
+            _random.nextDouble() * MediaQuery.of(context).size.width - 150,
+            _random.nextDouble() * MediaQuery.of(context).size.height - 150,
           ),
         );
+         // Random movement for the winner
+        _winningSpiderX = _random.nextDouble() * MediaQuery.of(context).size.width - 100;
+        _winningSpiderY = _random.nextDouble() * MediaQuery.of(context).size.height - 100;
       });
     });
   }
@@ -73,7 +85,7 @@ class Spiders extends State<SpiderScreen> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         // Here we take the value from the SpiderScreen object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text("Squish The Spiders"),
+        title: const Text("Squish The Spiders"),
       ),
       body: Stack(
         children: [
@@ -95,6 +107,20 @@ class Spiders extends State<SpiderScreen> {
             child: GestureDetector(
               onTap: _onObjectTappedScare,
               child: Image.asset("assets/spider.gif", width: 200,height: 200,),
+            ),
+          ),
+
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 500),
+            left: _winningSpiderX,
+            top: _winningSpiderY,
+            child: GestureDetector(
+              onTap: _onObjectTappedWin, // Navigate to separate screen
+              child: Image.asset(
+                'assets/spider.gif', // Separate image path
+                width: 200, // Customize size of the separate object
+                height: 200,
+              ),
             ),
           ),
         ],
@@ -126,7 +152,7 @@ class WinScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Second Screen"),
+        title: const Text("winning"),
       ),
       body: const Center(
         child: Text("You clicked on the object!"),
