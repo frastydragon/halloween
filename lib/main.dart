@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
         children: <Widget>[
           Positioned.fill( 
             child: Image(
-              image: AssetImage('assets/placeholder.png'),
+              image: AssetImage('assets/wall.jpg'),
               fit : BoxFit.fill,
            ),
           ), 
