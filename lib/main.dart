@@ -4,7 +4,7 @@ import 'dart:async';
 import 'dart:math';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -12,34 +12,52 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-        children: <Widget>[
-          Positioned.fill( 
-            child: Image(
-              image: AssetImage('assets/wall.jpg'),
-              fit : BoxFit.fill,
-           ),
-          ), 
-         ]
- );
+    return MaterialApp( 
+      home: SpiderScreen( ),
+    );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class SpiderScreen extends StatefulWidget {
+  SpiderScreen({super.key});
 
-  final String title;
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<SpiderScreen> createState() => Spiders();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class Spiders extends State<SpiderScreen> {
+  double _xPosition = 50;
+  double _yPosition = 100;
+  final Random _random = Random();
 
-
-  void _incrementCounter() {
-    setState(() {
+  @override
   
+  void initState() {
+    super.initState();
+    // Start moving the object randomly every second
+    Timer.periodic(const Duration(seconds: 1 ), (Timer timer) {
+      setState(() {
+        // Update the x and y positions randomly within screen limits
+        _xPosition = _random.nextDouble() * MediaQuery.of(context).size.width - 50;
+        _yPosition = _random.nextDouble() * MediaQuery.of(context).size.height - 50;
+      });
     });
+  }
+
+   void _onObjectTappedScare() {
+    // Navigate to a different screen when the object is tapped
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ScareScreen()),
+    );
+  }
+
+    void _onObjectTappedWin() {
+    // Navigate to a different screen when the object is tapped
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => WinScreen()),
+    );
   }
 
   @override
@@ -47,44 +65,69 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
+        // Here we take the value from the SpiderScreen object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text("s"),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      body: Stack(
+        children: [
+          // Background Container with an image
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/wall.jpg"), // Add your image in the assets folder
+                fit: BoxFit.cover,
+              ),
             ),
-            Text(
-              'l',
-              style: Theme.of(context).textTheme.headlineMedium,
+          ),
+
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 500),
+            left: _xPosition,
+            top: _yPosition,
+            child: GestureDetector(
+              onTap: _onObjectTappedScare,
+              child: Container(
+                width: 50,
+                height: 50,
+                color: Colors.red, // The moving object (a red square)
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+       // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class ScareScreen extends StatelessWidget {
+  const ScareScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Second Screen"),
+      ),
+      body: const Center(
+        child: Text("You clicked on the object!"),
+      ),
+    );
+  }
+}
+class WinScreen extends StatelessWidget {
+  const WinScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Second Screen"),
+      ),
+      body: const Center(
+        child: Text("You clicked on the object!"),
+      ),
     );
   }
 }
