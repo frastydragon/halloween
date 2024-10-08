@@ -28,6 +28,8 @@ class SpiderScreen extends StatefulWidget {
 class Spiders extends State<SpiderScreen> {
   double _xPosition = 50;
   double _yPosition = 100;
+  final int objectCount = 5; //Number of spiders
+  List<Offset> _positions = [];
   final Random _random = Random();
 
   @override
@@ -36,10 +38,14 @@ class Spiders extends State<SpiderScreen> {
     super.initState();
     // Start moving the object randomly every second
     Timer.periodic(const Duration(seconds: 1 ), (Timer timer) {
-      setState(() {
-        // Update the x and y positions randomly within screen limits
-        _xPosition = _random.nextDouble() * MediaQuery.of(context).size.width - 50;
-        _yPosition = _random.nextDouble() * MediaQuery.of(context).size.height - 50;
+      setState(() { 
+        _positions = List.generate(
+          objectCount,
+          (_) => Offset(
+            _random.nextDouble() * MediaQuery.of(context).size.width - 50,
+            _random.nextDouble() * MediaQuery.of(context).size.height - 50,
+          ),
+        );
       });
     });
   }
@@ -67,7 +73,7 @@ class Spiders extends State<SpiderScreen> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         // Here we take the value from the SpiderScreen object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text("s"),
+        title: Text("Squish The Spiders"),
       ),
       body: Stack(
         children: [
@@ -81,10 +87,11 @@ class Spiders extends State<SpiderScreen> {
             ),
           ),
 
+        for (int i = 0; i < objectCount; i++)
           AnimatedPositioned(
             duration: const Duration(milliseconds: 500),
-            left: _xPosition,
-            top: _yPosition,
+            left: _positions[i].dx,
+              top: _positions[i].dy,
             child: GestureDetector(
               onTap: _onObjectTappedScare,
               child: Image.asset("assets/spider.gif", width: 200,height: 200,),
