@@ -30,39 +30,44 @@ class Spiders extends State<SpiderScreen> {
   final AudioPlayer _audioPlayer2 = AudioPlayer();
   final AudioPlayer _audioPlayer3 = AudioPlayer();
   final AudioPlayer _audioPlayer4 = AudioPlayer();
+
   //winning spider
   double _winningSpiderX = 100;
   double _winningSpiderY = 150;
 
-  final int objectCount = 5; //Number of spiders
+  int objectCount = 7; //Number of spiders
   List<Offset> _positions = [];
   final Random _random = Random();
 
+  List<bool> _isSquished = [];
+
   @override
-  
   void initState() {
     super.initState();
     _loadSounds();
-     _positions = List.generate(
+    _positions = List.generate(
       objectCount,
       (_) => Offset(
         _random.nextDouble() * 300, // Initial random x position
         _random.nextDouble() * 500, // Initial random y position
       ),
     );
+
     // Start moving the object randomly every second
+    _isSquished = List.generate(objectCount, (_) => false);
+    
     Timer.periodic( Duration(seconds: 1 ), (Timer timer) {
       setState(() { 
         _positions = List.generate(
           objectCount,
           (_) => Offset(
-            _random.nextDouble() * MediaQuery.of(context).size.width - 150,
-            _random.nextDouble() * MediaQuery.of(context).size.height - 150,
+            _random.nextDouble() * (MediaQuery.of(context).size.width - 150),
+            _random.nextDouble() * (MediaQuery.of(context).size.height - 150),
           ),
         );
          // Random movement for the winner
-        _winningSpiderX = _random.nextDouble() * MediaQuery.of(context).size.width - 100;
-        _winningSpiderY = _random.nextDouble() * MediaQuery.of(context).size.height - 100;
+        _winningSpiderX = _random.nextDouble() * (MediaQuery.of(context).size.width - 100);
+        _winningSpiderY = _random.nextDouble() * (MediaQuery.of(context).size.height - 100);
       });
     });
   }
@@ -98,9 +103,12 @@ class Spiders extends State<SpiderScreen> {
     }
   }
 
-  void _onObjectTappedScare() {
+  void _onObjectTappedScare(int index) {
     // Navigate to a different screen when the object is tapped
     _playSound(2);
+    setState(() {
+       _isSquished[index] = true;
+    });
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => ScareScreen()),
@@ -149,18 +157,28 @@ class Spiders extends State<SpiderScreen> {
           ),
 
         for (int i = 0; i < objectCount; i++)
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 500),
-            left: _positions[i].dx,
-              top: _positions[i].dy,
+          TweenAnimationBuilder(
+            tween: Tween<Offset>(begin: Offset(0, 0), end: _positions[i]),
+            duration: const Duration(seconds: 3),
+            
+            builder: (context, Offset offset, child){
+              return Positioned(
+              left: offset.dx,
+              top: offset.dy,
+              child: child!,
+              );
+            },
+            
             child: GestureDetector(
-              onTap: _onObjectTappedScare,
-              child: Image.asset("assets/spider.gif", width: 200,height: 200,),
-            ),
+              onTap:!_isSquished[i] ? () => _onObjectTappedScare(i): null,
+              child:  _isSquished[i]
+              ? Image.asset("assets/ghost.png", width: 100, height: 100,)
+              : Image.asset("assets/spider.gif", width: 200,height: 200,),
+            )
           ),
 
           AnimatedPositioned(
-            duration: const Duration(milliseconds: 500),
+            duration: const Duration(seconds: 2),
             left: _winningSpiderX,
             top: _winningSpiderY,
             child: GestureDetector(
