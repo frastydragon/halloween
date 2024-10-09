@@ -114,10 +114,10 @@ class Spiders extends State<SpiderScreen> {
   final AudioPlayer _audioPlayer2 = AudioPlayer();
   final AudioPlayer _audioPlayer3 = AudioPlayer();
   final AudioPlayer _audioPlayer4 = AudioPlayer();
-
+  
   //winning spider
-  double _winningSpiderX = 100;
-  double _winningSpiderY = 150;
+  double _winningSpiderX = 20;
+  double _winningSpiderY = 15;
 
   //int spiderCount = 7; //Number of spiders
   List<Offset> _positions = [];
@@ -129,11 +129,12 @@ class Spiders extends State<SpiderScreen> {
   void initState() {
     super.initState();
     _loadSounds();
+    
     _positions = List.generate(
       widget.spiderCount,
       (_) => Offset(
-        _random.nextDouble() * 300, // Initial random x position
-        _random.nextDouble() * 500, // Initial random y position
+        _random.nextDouble() * 1300, // Initial random x position
+        _random.nextDouble() * 1500, // Initial random y position
       ),
     );
 
@@ -150,8 +151,8 @@ class Spiders extends State<SpiderScreen> {
           ),
         );
          // Random movement for the winner
-        _winningSpiderX = _random.nextDouble() * (MediaQuery.of(context).size.width - 100);
-        _winningSpiderY = _random.nextDouble() * (MediaQuery.of(context).size.height - 100);
+        _winningSpiderX = _random.nextDouble() * (MediaQuery.of(context).size.width - 150);
+        _winningSpiderY = _random.nextDouble() * (MediaQuery.of(context).size.height - 150);
       });
     });
   }
@@ -261,7 +262,7 @@ class Spiders extends State<SpiderScreen> {
           ),
 
           AnimatedPositioned(
-            duration: const Duration(seconds: 2),
+            duration: const Duration(milliseconds: 1500),
             left: _winningSpiderX,
             top: _winningSpiderY,
             child: GestureDetector(
