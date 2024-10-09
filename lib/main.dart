@@ -109,6 +109,7 @@ class SpiderScreen extends StatefulWidget {
 }
 
 class Spiders extends State<SpiderScreen> {
+  
   final AudioPlayer _audioPlayer1 = AudioPlayer();
   final AudioPlayer _audioPlayer2 = AudioPlayer();
   final AudioPlayer _audioPlayer3 = AudioPlayer();
