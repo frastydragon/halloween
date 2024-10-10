@@ -98,13 +98,17 @@ class Spiders extends State<SpiderScreen> {
     }
   }
 
-  void _onObjectTappedScare() {
+  void _onObjectTappedScare(int index) {
     // Navigate to a different screen when the object is tapped
+    setState(() {
+      _positions.removeAt(index); // Remove the object from the list
+    });
     _playSound(2);
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => ScareScreen()),
     );
+    
   }
 
   void _onObjectTappedWin() {
@@ -117,6 +121,9 @@ class Spiders extends State<SpiderScreen> {
       MaterialPageRoute(builder: (context) => WinScreen()),
     );
   }
+
+
+  
 
   @override
   void dispose() {
@@ -154,7 +161,8 @@ class Spiders extends State<SpiderScreen> {
             left: _positions[i].dx,
               top: _positions[i].dy,
             child: GestureDetector(
-              onTap: _onObjectTappedScare,
+              onTap: () => _onObjectTappedScare(i),
+              
               child: Image.asset("assets/spider.gif", width: 200,height: 200,),
             ),
           ),
