@@ -13,13 +13,97 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp( 
-      home: SpiderScreen( ),
+      home: WelcomeScreen( ),
+    );
+  }
+}
+class WelcomeScreen extends StatelessWidget {
+  const WelcomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/wall.jpg"), // Add your image in the assets folder
+                fit: BoxFit.cover,
+              ),
+            ),
+          
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Welcome to the Spider Squishing Game!',
+              style: TextStyle(
+                fontSize: 44,
+                color: Colors.white,
+                fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 15),
+             ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SpiderScreen(spiderCount: 4), // Easy
+                    ),
+                  );
+                },
+                child: const Text('Easy (5 Spiders)'),
+                
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SpiderScreen(spiderCount: 9), // Medium
+                    ),
+                  );
+                },
+                child: const Text('Medium (10 Spiders)'),
+
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SpiderScreen(spiderCount: 15), // Hard
+                    ),
+                  );
+                },
+                child: const Text('Hard (15 Spiders)'),
+              ),
+              const SizedBox(height: 10),
+               ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SpiderScreen(spiderCount: 30), // Hard
+                    ),
+                  );
+                },
+                child: const Text('Nightmare (30 Spiders)'),
+              ),
+          ],
+        ),
+      ),
+    ) 
     );
   }
 }
 
 class SpiderScreen extends StatefulWidget {
-  SpiderScreen({super.key});
+  final int spiderCount;
+  
+  SpiderScreen({super.key, required this.spiderCount});
 
   @override
   State<SpiderScreen> createState() => Spiders();
@@ -30,39 +114,45 @@ class Spiders extends State<SpiderScreen> {
   final AudioPlayer _audioPlayer2 = AudioPlayer();
   final AudioPlayer _audioPlayer3 = AudioPlayer();
   final AudioPlayer _audioPlayer4 = AudioPlayer();
+  
   //winning spider
-  double _winningSpiderX = 100;
-  double _winningSpiderY = 150;
+  double _winningSpiderX = 20;
+  double _winningSpiderY = 15;
 
-  final int objectCount = 5; //Number of spiders
+  //int spiderCount = 7; //Number of spiders
   List<Offset> _positions = [];
   final Random _random = Random();
 
+  List<bool> _isSquished = [];
+
   @override
-  
   void initState() {
     super.initState();
     _loadSounds();
-     _positions = List.generate(
-      objectCount,
+    
+    _positions = List.generate(
+      widget.spiderCount,
       (_) => Offset(
-        _random.nextDouble() * 300, // Initial random x position
-        _random.nextDouble() * 500, // Initial random y position
+        _random.nextDouble() * 1300, // Initial random x position
+        _random.nextDouble() * 1500, // Initial random y position
       ),
     );
+
     // Start moving the object randomly every second
+    _isSquished = List.generate(widget.spiderCount, (_) => false);
+    
     Timer.periodic( Duration(seconds: 1 ), (Timer timer) {
       setState(() { 
         _positions = List.generate(
-          objectCount,
+          widget.spiderCount,
           (_) => Offset(
-            _random.nextDouble() * MediaQuery.of(context).size.width - 150,
-            _random.nextDouble() * MediaQuery.of(context).size.height - 150,
+            _random.nextDouble() * (MediaQuery.of(context).size.width - 150),
+            _random.nextDouble() * (MediaQuery.of(context).size.height - 150),
           ),
         );
          // Random movement for the winner
-        _winningSpiderX = _random.nextDouble() * MediaQuery.of(context).size.width - 100;
-        _winningSpiderY = _random.nextDouble() * MediaQuery.of(context).size.height - 100;
+        _winningSpiderX = _random.nextDouble() * (MediaQuery.of(context).size.width - 150);
+        _winningSpiderY = _random.nextDouble() * (MediaQuery.of(context).size.height - 150);
       });
     });
   }
@@ -100,15 +190,14 @@ class Spiders extends State<SpiderScreen> {
 
   void _onObjectTappedScare(int index) {
     // Navigate to a different screen when the object is tapped
-    setState(() {
-      _positions.removeAt(index); // Remove the object from the list
-    });
     _playSound(2);
+    setState(() {
+       _isSquished[index] = true;
+    });
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => ScareScreen()),
     );
-    
   }
 
   void _onObjectTappedWin() {
@@ -121,9 +210,6 @@ class Spiders extends State<SpiderScreen> {
       MaterialPageRoute(builder: (context) => WinScreen()),
     );
   }
-
-
-  
 
   @override
   void dispose() {
@@ -139,8 +225,7 @@ class Spiders extends State<SpiderScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the SpiderScreen object that was created by
-        // the App.build method, and use it to set our appbar title.
+     
         title: const Text("Squish The Spiders"),
       ),
       body: Stack(
@@ -155,20 +240,29 @@ class Spiders extends State<SpiderScreen> {
             ),
           ),
 
-        for (int i = 0; i < objectCount; i++)
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 500),
-            left: _positions[i].dx,
-              top: _positions[i].dy,
+        for (int i = 0; i < widget.spiderCount; i++)
+          TweenAnimationBuilder(
+            tween: Tween<Offset>(begin: Offset(0, 0), end: _positions[i]),
+            duration: const Duration(seconds: 2),
+            
+            builder: (context, Offset offset, child){
+              return Positioned(
+              left: offset.dx,
+              top: offset.dy,
+              child: child!,
+              );
+            },
+            
             child: GestureDetector(
-              onTap: () => _onObjectTappedScare(i),
-              
-              child: Image.asset("assets/spider.gif", width: 200,height: 200,),
-            ),
+              onTap:!_isSquished[i] ? () => _onObjectTappedScare(i): null,
+              child:  _isSquished[i]
+              ? Image.asset("assets/ghost.png", width: 100, height: 100,)
+              : Image.asset("assets/spider.gif", width: 200,height: 200,),
+            )
           ),
 
           AnimatedPositioned(
-            duration: const Duration(milliseconds: 500),
+            duration: const Duration(milliseconds: 1500),
             left: _winningSpiderX,
             top: _winningSpiderY,
             child: GestureDetector(
